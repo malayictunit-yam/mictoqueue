@@ -14,13 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      counters: {
+        Row: {
+          category: string
+          current_number: number
+          id: string
+          last_reset_date: string
+        }
+        Insert: {
+          category: string
+          current_number?: number
+          id?: string
+          last_reset_date?: string
+        }
+        Update: {
+          category?: string
+          current_number?: number
+          id?: string
+          last_reset_date?: string
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          number: number
+          status: string
+          ticket_number: string
+          window_id: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          number: number
+          status?: string
+          ticket_number: string
+          window_id: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          number?: number
+          status?: string
+          ticket_number?: string
+          window_id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      call_next_ticket: {
+        Args: { p_window_id: number }
+        Returns: {
+          ticket_id: string
+          ticket_label: string
+        }[]
+      }
+      done_ticket: { Args: { p_window_id: number }; Returns: undefined }
+      get_next_ticket: {
+        Args: { p_category: string }
+        Returns: {
+          ticket_label: string
+          ticket_num: number
+          window_num: number
+        }[]
+      }
+      recall_ticket: {
+        Args: { p_window_id: number }
+        Returns: {
+          ticket_id: string
+          ticket_label: string
+        }[]
+      }
+      skip_ticket: { Args: { p_window_id: number }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
