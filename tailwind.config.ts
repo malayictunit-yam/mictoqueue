@@ -47,6 +47,20 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        serving: {
+          DEFAULT: "hsl(var(--serving))",
+          foreground: "hsl(var(--serving-foreground))",
+        },
+        waiting: {
+          DEFAULT: "hsl(var(--waiting))",
+          foreground: "hsl(var(--waiting-foreground))",
+        },
+        done: "hsl(var(--done))",
+        skipped: "hsl(var(--skipped))",
+        "window-1": "hsl(var(--window-1))",
+        "window-2": "hsl(var(--window-2))",
+        "window-3": "hsl(var(--window-3))",
+        "window-4": "hsl(var(--window-4))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -65,20 +79,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
