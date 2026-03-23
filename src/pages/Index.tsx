@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Ticket, Monitor, Settings, Tv } from 'lucide-react';
+import { Ticket, Monitor, Settings, Tv, ShieldCheck } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+
+const KIOSK_URL = `${window.location.origin}/kiosk`;
 
 const Index = () => {
   return (
@@ -13,11 +16,20 @@ const Index = () => {
           <p className="text-muted-foreground mt-2">Government Services Queue Management</p>
         </div>
 
+        {/* QR Code */}
+        <div className="bg-card rounded-2xl border border-border shadow-sm p-6 mb-6 text-center animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-3">Scan to take a ticket</p>
+          <div className="inline-block p-3 bg-white rounded-xl">
+            <QRCodeSVG value={KIOSK_URL} size={160} level="M" />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3 break-all">{KIOSK_URL}</p>
+        </div>
+
         <div className="space-y-3">
           <Link
             to="/kiosk"
             className="flex items-center gap-4 p-5 rounded-xl bg-card shadow-sm border border-border hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] animate-fade-in-up"
-            style={{ animationDelay: '100ms' }}
+            style={{ animationDelay: '140ms' }}
           >
             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
               <Monitor className="w-6 h-6 text-primary-foreground" />
@@ -33,7 +45,7 @@ const Index = () => {
               key={w}
               to={`/operator/${w}`}
               className="flex items-center gap-4 p-5 rounded-xl bg-card shadow-sm border border-border hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] animate-fade-in-up"
-              style={{ animationDelay: `${(i + 2) * 80}ms` }}
+              style={{ animationDelay: `${(i + 3) * 80}ms` }}
             >
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
                 <Settings className="w-6 h-6 text-secondary-foreground" />
@@ -48,7 +60,7 @@ const Index = () => {
           <Link
             to="/display"
             className="flex items-center gap-4 p-5 rounded-xl bg-card shadow-sm border border-border hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] animate-fade-in-up"
-            style={{ animationDelay: '560ms' }}
+            style={{ animationDelay: '600ms' }}
           >
             <div className="w-12 h-12 rounded-xl bg-foreground flex items-center justify-center flex-shrink-0">
               <Tv className="w-6 h-6 text-primary-foreground" />
@@ -56,6 +68,20 @@ const Index = () => {
             <div>
               <p className="font-semibold text-foreground">Display Screen</p>
               <p className="text-xs text-muted-foreground">TV dashboard — now serving</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/admin"
+            className="flex items-center gap-4 p-5 rounded-xl bg-card shadow-sm border border-border hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] animate-fade-in-up"
+            style={{ animationDelay: '680ms' }}
+          >
+            <div className="w-12 h-12 rounded-xl bg-destructive flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-6 h-6 text-destructive-foreground" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Admin Panel</p>
+              <p className="text-xs text-muted-foreground">Reset queues & view statistics</p>
             </div>
           </Link>
         </div>

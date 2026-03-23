@@ -1,0 +1,192 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { CATEGORIES, getWindowColor } from '@/lib/queue';
+import { RotateCcw, BarChart3, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+interface DayStats {
+  category: string;
+  total: number;
+  served: number;
+  skipped: number;
+  waiting: number;
+  serving: number;
+}
+
+const AdminPage = () => {
+  const [stats, setStats] = useState<DayStats[]>([]);
+  const [resetting, setResetting] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const fetchStats = useCallback(async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const { data: tickets } = await supabase
+      .from('tickets')
+      .select('*')
+      .gte('created_at', `${today}T00:00:00`)
+      .order('number', { ascending: true });
+
+    const dayStats: DayStats[] = CATEGORIES.map(cat => {
+      const catTickets = tickets?.filter(t => t.category === cat.key) || [];
+      return {
+        category: cat.key,
+        total: catTickets.length,
+        served: catTickets.filter(t => t.status === 'done').length,
+        skipped: catTickets.filter(t => t.status === 'skipped').length,
+        waiting: catTickets.filter(t => t.status === 'waiting').length,
+        serving: catTickets.filter(t => t.status === 'serving').length,
+      };
+    });
+    setStats(dayStats);
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+    const interval = setInterval(fetchStats, 10000);
+    return () => clearInterval(interval);
+  }, [fetchStats]);
+
+  const resetAllQueues = async () => {
+    setResetting(true);
+    // Mark all active tickets as done
+    await supabase
+      .from('tickets')
+      .update({ status: 'done' })
+      .in('status', ['waiting', 'serving']);
+
+    // Reset counters
+    for (const cat of CATEGORIES) {
+      await supabase
+        .from('counters')
+        .update({ current_number: 0, last_reset_date: new Date().toISOString().split('T')[0] })
+        .eq('category', cat.key);
+    }
+
+    setConfirmReset(false);
+    setResetting(false);
+    fetchStats();
+  };
+
+  const totalToday = stats.reduce((a, s) => a + s.total, 0);
+  const totalServed = stats.reduce((a, s) => a + s.served, 0);
+  const totalWaiting = stats.reduce((a, s) => a + s.waiting, 0);
+
+  return (
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8 animate-fade-in-up">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Administration</p>
+            <h1 className="text-2xl font-bold text-foreground">Queue Management</h1>
+          </div>
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back
+          </Link>
+        </div>
+
+        {/* Summary cards */}
+        <div className="grid grid-cols-3 gap-3 mb-6 animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+          <div className="bg-card rounded-xl p-5 shadow-sm border border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Today's Tickets</p>
+            <p className="text-3xl font-bold text-foreground tabular-nums mt-1">{totalToday}</p>
+          </div>
+          <div className="bg-card rounded-xl p-5 shadow-sm border border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Served</p>
+            <p className="text-3xl font-bold text-serving tabular-nums mt-1">{totalServed}</p>
+          </div>
+          <div className="bg-card rounded-xl p-5 shadow-sm border border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Waiting</p>
+            <p className="text-3xl font-bold text-primary tabular-nums mt-1">{totalWaiting}</p>
+          </div>
+        </div>
+
+        {/* Per-window stats */}
+        <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '160ms' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Window Statistics</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {CATEGORIES.map((cat, i) => {
+              const s = stats.find(st => st.category === cat.key);
+              return (
+                <div
+                  key={cat.key}
+                  className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
+                >
+                  <div className={`${getWindowColor(cat.window)} px-4 py-2.5 flex items-center justify-between`}>
+                    <span className="text-sm font-semibold text-primary-foreground">
+                      Window {cat.window} — {cat.label}
+                    </span>
+                    <span className="text-xs font-mono text-primary-foreground/80">{cat.key}</span>
+                  </div>
+                  <div className="p-4 grid grid-cols-4 gap-2 text-center">
+                    <div>
+                      <p className="text-lg font-bold tabular-nums text-foreground">{s?.total || 0}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">Total</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold tabular-nums text-serving">{s?.served || 0}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">Served</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold tabular-nums text-primary">{s?.waiting || 0}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">Waiting</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold tabular-nums text-destructive">{s?.skipped || 0}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">Skipped</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Reset section */}
+        <div className="animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Queue Controls</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Reset all queues to clear waiting and serving tickets. This marks all active tickets as done and resets counters.
+            </p>
+            {!confirmReset ? (
+              <button
+                onClick={() => setConfirmReset(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-destructive-foreground font-medium hover:opacity-90 transition-all active:scale-[0.98]"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset All Queues
+              </button>
+            ) : (
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
+                <p className="text-sm text-destructive flex-1">Are you sure? This cannot be undone.</p>
+                <button
+                  onClick={resetAllQueues}
+                  disabled={resetting}
+                  className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                >
+                  {resetting ? 'Resetting…' : 'Confirm'}
+                </button>
+                <button
+                  onClick={() => setConfirmReset(false)}
+                  className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminPage;
