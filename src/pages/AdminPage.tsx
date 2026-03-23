@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, getWindowColor } from '@/lib/queue';
-import { RotateCcw, BarChart3, AlertTriangle } from 'lucide-react';
+import { RotateCcw, BarChart3, AlertTriangle, Palette } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DayStats {
@@ -148,8 +148,24 @@ const AdminPage = () => {
           </div>
         </div>
 
+        {/* Display Settings link */}
+        <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+          <Link
+            to="/admin/display"
+            className="flex items-center gap-4 p-5 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+              <Palette className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Display Settings</p>
+              <p className="text-xs text-muted-foreground">Branding, window labels, ads & ticker</p>
+            </div>
+          </Link>
+        </div>
+
         {/* Reset section */}
-        <div className="animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+        <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Queue Controls</h2>
             <p className="text-sm text-muted-foreground mb-4">

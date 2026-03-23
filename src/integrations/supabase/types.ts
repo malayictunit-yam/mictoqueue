@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads: {
+        Row: {
+          created_at: string
+          file_url: string
+          id: string
+          is_active: boolean
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          id?: string
+          is_active?: boolean
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          id?: string
+          is_active?: boolean
+          type?: string
+        }
+        Relationships: []
+      }
       counters: {
         Row: {
           category: string
@@ -32,6 +56,30 @@ export type Database = {
           current_number?: number
           id?: string
           last_reset_date?: string
+        }
+        Relationships: []
+      }
+      display_settings: {
+        Row: {
+          department_name: string
+          id: string
+          logo_url: string | null
+          ticker_text: string
+          updated_at: string
+        }
+        Insert: {
+          department_name?: string
+          id?: string
+          logo_url?: string | null
+          ticker_text?: string
+          updated_at?: string
+        }
+        Update: {
+          department_name?: string
+          id?: string
+          logo_url?: string | null
+          ticker_text?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -61,6 +109,27 @@ export type Database = {
           number?: number
           status?: string
           ticket_number?: string
+          window_id?: number
+        }
+        Relationships: []
+      }
+      window_labels: {
+        Row: {
+          category: string
+          id: string
+          label: string
+          window_id: number
+        }
+        Insert: {
+          category: string
+          id?: string
+          label: string
+          window_id: number
+        }
+        Update: {
+          category?: string
+          id?: string
+          label?: string
           window_id?: number
         }
         Relationships: []
