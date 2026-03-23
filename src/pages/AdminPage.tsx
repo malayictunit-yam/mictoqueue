@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, getWindowColor } from '@/lib/queue';
-import { RotateCcw, BarChart3, AlertTriangle } from 'lucide-react';
+import { RotateCcw, BarChart3, AlertTriangle, Palette } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DayStats {
