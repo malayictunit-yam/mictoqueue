@@ -23,6 +23,7 @@ const App = () => (
           <Route path="/kiosk" element={<KioskPage />} />
           <Route path="/operator/:windowId" element={<OperatorPage />} />
           <Route path="/display" element={<DisplayPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
