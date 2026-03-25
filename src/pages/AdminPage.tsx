@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, getWindowColor } from '@/lib/queue';
-import { RotateCcw, BarChart3, AlertTriangle, Palette } from 'lucide-react';
+import { RotateCcw, BarChart3, AlertTriangle, Palette, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface DayStats {
   category: string;
@@ -17,6 +19,7 @@ const AdminPage = () => {
   const [stats, setStats] = useState<DayStats[]>([]);
   const [resetting, setResetting] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const navigate = useNavigate();
 
   const fetchStats = useCallback(async () => {
     const today = new Date().toISOString().split('T')[0];
@@ -48,13 +51,11 @@ const AdminPage = () => {
 
   const resetAllQueues = async () => {
     setResetting(true);
-    // Mark all active tickets as done
     await supabase
       .from('tickets')
       .update({ status: 'done' })
       .in('status', ['waiting', 'serving']);
 
-    // Reset counters
     for (const cat of CATEGORIES) {
       await supabase
         .from('counters')
@@ -65,6 +66,12 @@ const AdminPage = () => {
     setConfirmReset(false);
     setResetting(false);
     fetchStats();
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Logged out');
+    navigate('/login');
   };
 
   const totalToday = stats.reduce((a, s) => a + s.total, 0);
@@ -80,12 +87,15 @@ const AdminPage = () => {
             <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Administration</p>
             <h1 className="text-2xl font-bold text-foreground">Queue Management</h1>
           </div>
-          <Link
-            to="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← Back</Link>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-muted-foreground text-sm hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" /> Logout
+            </button>
+          </div>
         </div>
 
         {/* Summary cards */}
@@ -111,13 +121,10 @@ const AdminPage = () => {
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Window Statistics</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {CATEGORIES.map((cat, i) => {
+            {CATEGORIES.map(cat => {
               const s = stats.find(st => st.category === cat.key);
               return (
-                <div
-                  key={cat.key}
-                  className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
-                >
+                <div key={cat.key} className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
                   <div className={`${getWindowColor(cat.window)} px-4 py-2.5 flex items-center justify-between`}>
                     <span className="text-sm font-semibold text-primary-foreground">
                       Window {cat.window} — {cat.label}
