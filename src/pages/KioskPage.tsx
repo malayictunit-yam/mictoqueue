@@ -17,12 +17,15 @@ interface TicketResult {
   label: string;
   window: number;
   category: string;
+  clientName: string;
 }
 
 const KioskPage = () => {
   const [loading, setLoading] = useState(false);
   const [ticket, setTicket] = useState<TicketResult | null>(null);
   const [error, setError] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
 
   const canTakeTicket = () => {
     const last = localStorage.getItem(COOLDOWN_KEY);
@@ -30,16 +33,28 @@ const KioskPage = () => {
     return Date.now() - parseInt(last) > COOLDOWN_MS;
   };
 
-  const takeTicket = async (category: CategoryKey) => {
+  const handleSelectCategory = (category: CategoryKey) => {
     if (!canTakeTicket()) {
       setError('Please wait 3 minutes between tickets.');
+      return;
+    }
+    setSelectedCategory(category);
+    setError('');
+  };
+
+  const takeTicket = async () => {
+    if (!selectedCategory) return;
+    const name = clientName.trim().slice(0, 100);
+    if (!name) {
+      setError('Please enter your name.');
       return;
     }
     setLoading(true);
     setError('');
     try {
       const { data, error: err } = await supabase.rpc('get_next_ticket', {
-        p_category: category,
+        p_category: selectedCategory,
+        p_client_name: name,
       });
       if (err) throw err;
       const row = data?.[0];
@@ -47,7 +62,8 @@ const KioskPage = () => {
         setTicket({
           label: row.ticket_label,
           window: row.window_num,
-          category,
+          category: selectedCategory,
+          clientName: name,
         });
         localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
       }
@@ -69,6 +85,7 @@ const KioskPage = () => {
               <p className="font-mono-display text-5xl font-bold mt-2 leading-tight">{ticket.label}</p>
             </div>
             <div className="p-6 text-center space-y-3">
+              <p className="text-foreground font-semibold">{ticket.clientName}</p>
               <p className="text-muted-foreground text-sm">{cat.label}</p>
               <div className="bg-secondary rounded-lg p-4">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Proceed to</p>
@@ -78,10 +95,63 @@ const KioskPage = () => {
             </div>
           </div>
           <button
-            onClick={() => setTicket(null)}
+            onClick={() => { setTicket(null); setClientName(''); setSelectedCategory(null); }}
             className="mt-6 w-full py-3 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-muted transition-colors active:scale-[0.98]"
           >
             Back to Menu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Name input step
+  if (selectedCategory) {
+    const cat = CATEGORIES.find(c => c.key === selectedCategory)!;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="w-full max-w-sm animate-fade-in-up">
+          <div className="text-center mb-6">
+            <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${getWindowColor(cat.window)} mb-4`}>
+              {(() => { const Icon = ICONS[cat.key]; return <Icon className="w-7 h-7 text-primary-foreground" />; })()}
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">{cat.label}</h1>
+            <p className="text-muted-foreground text-sm mt-1">Enter your name to get a ticket</p>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-4">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Your Name</label>
+              <input
+                type="text"
+                value={clientName}
+                onChange={e => setClientName(e.target.value)}
+                maxLength={100}
+                placeholder="e.g. Juan Dela Cruz"
+                className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={takeTicket}
+              disabled={loading}
+              className={`w-full py-3 rounded-xl ${getWindowColor(cat.window)} text-primary-foreground font-semibold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50`}
+            >
+              {loading ? 'Getting Ticket…' : 'Get Ticket'}
+            </button>
+          </div>
+
+          <button
+            onClick={() => { setSelectedCategory(null); setError(''); }}
+            className="mt-4 w-full py-2.5 rounded-xl bg-secondary text-secondary-foreground text-sm font-medium hover:bg-muted transition-colors"
+          >
+            ← Back
           </button>
         </div>
       </div>
@@ -111,9 +181,8 @@ const KioskPage = () => {
             return (
               <button
                 key={cat.key}
-                disabled={loading}
-                onClick={() => takeTicket(cat.key)}
-                className={`group flex items-center gap-4 p-5 rounded-xl bg-card shadow-sm border border-border hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 text-left animate-fade-in-up`}
+                onClick={() => handleSelectCategory(cat.key)}
+                className="group flex items-center gap-4 p-5 rounded-xl bg-card shadow-sm border border-border hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] text-left animate-fade-in-up"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${getWindowColor(cat.window)} flex items-center justify-center`}>

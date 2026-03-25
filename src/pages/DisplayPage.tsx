@@ -8,6 +8,7 @@ interface WindowStatus {
   label: string;
   customLabel: string;
   serving: string | null;
+  servingName: string;
   waiting: string[];
 }
 
@@ -22,7 +23,6 @@ interface Ad {
   file_url: string;
 }
 
-// Isolated media component — never re-renders on queue updates
 const MediaPanel = memo(({ ad }: { ad: Ad | null }) => {
   if (!ad) {
     return (
@@ -31,28 +31,12 @@ const MediaPanel = memo(({ ad }: { ad: Ad | null }) => {
       </div>
     );
   }
-
   if (ad.type === 'video') {
     return (
-      <video
-        key={ad.file_url}
-        src={ad.file_url}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="w-full h-full object-contain bg-black"
-      />
+      <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-contain bg-black" />
     );
   }
-
-  return (
-    <img
-      src={ad.file_url}
-      alt="Advertisement"
-      className="w-full h-full object-contain bg-black"
-    />
-  );
+  return <img src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
 });
 MediaPanel.displayName = 'MediaPanel';
 
@@ -91,15 +75,16 @@ const DisplayPage = () => {
         label: cat.label,
         customLabel: wl?.label || `Window ${cat.window}`,
         serving: servingTicket?.ticket_number || null,
+        servingName: servingTicket?.client_name || '',
         waiting: waitingTickets.map(t => t.ticket_number),
       };
     });
 
-    // TTS for newly serving tickets
     statuses.forEach(s => {
       const prev = prevServingRef.current[s.windowId];
       if (s.serving && s.serving !== prev) {
-        speak(`Now serving ${s.serving.replace('-', ' ')} at ${s.customLabel}`);
+        const nameAnnounce = s.servingName ? `, ${s.servingName},` : '';
+        speak(`Now serving ${s.serving.replace('-', ' ')}${nameAnnounce} at ${s.customLabel}`);
       }
     });
     prevServingRef.current = Object.fromEntries(statuses.map(s => [s.windowId, s.serving]));
@@ -108,7 +93,6 @@ const DisplayPage = () => {
 
   useEffect(() => {
     let windowLabelsCache: { window_id: number; label: string }[] = [];
-
     const init = async () => {
       const wl = await fetchSettings();
       windowLabelsCache = wl;
@@ -116,7 +100,6 @@ const DisplayPage = () => {
     };
     init();
 
-    // Only ticket changes trigger queue refetch — NOT full page re-render
     const ticketChannel = supabase
       .channel('display-tickets')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
@@ -124,7 +107,6 @@ const DisplayPage = () => {
       })
       .subscribe();
 
-    // Settings/ads changes are infrequent
     const settingsChannel = supabase
       .channel('display-settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'display_settings' }, () => fetchSettings())
@@ -134,10 +116,7 @@ const DisplayPage = () => {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'window_labels' }, async () => {
         const { data: wl } = await supabase.from('window_labels').select('*').order('window_id');
-        if (wl) {
-          windowLabelsCache = wl;
-          fetchQueue(wl);
-        }
+        if (wl) { windowLabelsCache = wl; fetchQueue(wl); }
       })
       .subscribe();
 
@@ -149,7 +128,6 @@ const DisplayPage = () => {
 
   return (
     <div className="h-screen bg-foreground flex flex-col overflow-hidden">
-      {/* Header */}
       <header className="flex items-center gap-4 px-6 py-3 bg-card/10 border-b border-primary-foreground/10 flex-shrink-0">
         {settings?.logo_url && (
           <img src={settings.logo_url} alt="Logo" className="h-12 w-auto object-contain" />
@@ -162,51 +140,40 @@ const DisplayPage = () => {
         </div>
       </header>
 
-      {/* Main: 2-column layout */}
       <div className="flex-1 flex min-h-0">
-        {/* LEFT — Queue Display */}
         <div className="flex-1 p-4 md:p-6 overflow-auto">
           <p className="text-xs text-primary-foreground/40 uppercase tracking-widest font-medium mb-4">Now Serving</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            {windows.map((w, i) => (
-              <div
-                key={w.windowId}
-                className="rounded-xl overflow-hidden bg-card/5 border border-primary-foreground/10"
-              >
-                {/* Window header */}
+            {windows.map(w => (
+              <div key={w.windowId} className="rounded-xl overflow-hidden bg-card/5 border border-primary-foreground/10">
                 <div className={`${getWindowColor(w.windowId)} px-4 py-3 flex items-center justify-between`}>
                   <div>
-                    <p className="text-[10px] font-semibold text-primary-foreground/70 uppercase tracking-wider">
-                      {w.customLabel}
-                    </p>
+                    <p className="text-[10px] font-semibold text-primary-foreground/70 uppercase tracking-wider">{w.customLabel}</p>
                     <p className="text-xs font-medium text-primary-foreground/80">{w.label}</p>
                   </div>
-                  <span className="text-[10px] font-medium bg-primary-foreground/20 text-primary-foreground px-2 py-0.5 rounded">
-                    {w.category}
-                  </span>
+                  <span className="text-[10px] font-medium bg-primary-foreground/20 text-primary-foreground px-2 py-0.5 rounded">{w.category}</span>
                 </div>
-
-                {/* Serving number */}
                 <div className="p-5 md:p-6 text-center">
                   {w.serving ? (
-                    <p className={`font-mono text-4xl md:text-5xl font-bold ${getWindowTextColor(w.windowId)} animate-pulse leading-none tracking-wider`}>
-                      {w.serving}
-                    </p>
+                    <>
+                      <p className={`font-mono text-4xl md:text-5xl font-bold ${getWindowTextColor(w.windowId)} animate-pulse leading-none tracking-wider`}>
+                        {w.serving}
+                      </p>
+                      {w.servingName && (
+                        <p className="text-sm text-primary-foreground/50 mt-2">{w.servingName}</p>
+                      )}
+                    </>
                   ) : (
                     <p className="text-xl text-primary-foreground/20 font-medium">—</p>
                   )}
                 </div>
-
-                {/* Waiting list */}
                 <div className="px-4 pb-4">
                   <p className="text-[10px] text-primary-foreground/30 uppercase tracking-wider mb-1.5 font-medium">
                     Waiting ({w.waiting.length})
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {w.waiting.slice(0, 6).map(t => (
-                      <span key={t} className="font-mono text-[10px] bg-primary-foreground/8 text-primary-foreground/60 px-1.5 py-0.5 rounded">
-                        {t}
-                      </span>
+                      <span key={t} className="font-mono text-[10px] bg-primary-foreground/8 text-primary-foreground/60 px-1.5 py-0.5 rounded">{t}</span>
                     ))}
                     {w.waiting.length > 6 && (
                       <span className="text-[10px] text-primary-foreground/30 px-1.5 py-0.5">+{w.waiting.length - 6}</span>
@@ -221,13 +188,11 @@ const DisplayPage = () => {
           </div>
         </div>
 
-        {/* RIGHT — Ad Panel */}
         <div className="w-[40%] max-w-[500px] border-l border-primary-foreground/10 flex-shrink-0">
           <MediaPanel ad={activeAd} />
         </div>
       </div>
 
-      {/* Footer ticker */}
       {settings?.ticker_text && (
         <footer className="bg-primary px-0 py-2 flex-shrink-0 overflow-hidden">
           <div className="animate-marquee whitespace-nowrap">

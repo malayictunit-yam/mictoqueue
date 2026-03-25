@@ -1,15 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getCategoryByWindow, getWindowColor, getWindowBorderColor, speak } from '@/lib/queue';
-import { SkipForward, RotateCcw, CheckCircle2, ChevronRight, Volume2 } from 'lucide-react';
+import { SkipForward, RotateCcw, CheckCircle2, ChevronRight, Volume2, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 
 const OperatorPage = () => {
   const { windowId } = useParams<{ windowId: string }>();
   const wId = parseInt(windowId || '1');
   const cat = getCategoryByWindow(wId);
+  const navigate = useNavigate();
 
-  const [currentServing, setCurrentServing] = useState<string | null>(null);
+  const [currentServing, setCurrentServing] = useState<{ ticket: string; name: string } | null>(null);
   const [waitingCount, setWaitingCount] = useState(0);
   const [nextInQueue, setNextInQueue] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,11 +20,16 @@ const OperatorPage = () => {
   const fetchState = useCallback(async () => {
     const { data: servingData } = await supabase
       .from('tickets')
-      .select('ticket_number')
+      .select('ticket_number, client_name')
       .eq('window_id', wId)
       .eq('status', 'serving')
       .limit(1);
-    setCurrentServing(servingData?.[0]?.ticket_number || null);
+
+    if (servingData?.[0]) {
+      setCurrentServing({ ticket: servingData[0].ticket_number, name: servingData[0].client_name });
+    } else {
+      setCurrentServing(null);
+    }
 
     const { data: waitingData } = await supabase
       .from('tickets')
@@ -80,6 +87,12 @@ const OperatorPage = () => {
     setLoading(false);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Logged out');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col">
       <div className="max-w-lg mx-auto w-full flex-1 flex flex-col">
@@ -90,12 +103,20 @@ const OperatorPage = () => {
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Operator Panel</p>
               <h1 className="text-xl font-bold text-foreground">Window {wId} — {cat.label}</h1>
             </div>
-            <button
-              onClick={() => setTtsEnabled(!ttsEnabled)}
-              className={`p-2.5 rounded-xl transition-colors ${ttsEnabled ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
-            >
-              <Volume2 className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setTtsEnabled(!ttsEnabled)}
+                className={`p-2.5 rounded-xl transition-colors ${ttsEnabled ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+              >
+                <Volume2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="p-2.5 rounded-xl bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -107,7 +128,12 @@ const OperatorPage = () => {
             </div>
             <div className="p-6 text-center">
               {currentServing ? (
-                <p className="font-mono-display text-5xl font-bold text-foreground leading-tight">{currentServing}</p>
+                <>
+                  <p className="font-mono-display text-5xl font-bold text-foreground leading-tight">{currentServing.ticket}</p>
+                  {currentServing.name && (
+                    <p className="text-sm text-muted-foreground mt-2">{currentServing.name}</p>
+                  )}
+                </>
               ) : (
                 <p className="text-lg text-muted-foreground">No ticket being served</p>
               )}
