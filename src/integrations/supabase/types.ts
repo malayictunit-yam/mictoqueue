@@ -83,9 +83,28 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       tickets: {
         Row: {
           category: string
+          client_name: string
           created_at: string
           id: string
           number: number
@@ -95,6 +114,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          client_name?: string
           created_at?: string
           id?: string
           number: number
@@ -104,12 +124,31 @@ export type Database = {
         }
         Update: {
           category?: string
+          client_name?: string
           created_at?: string
           id?: string
           number?: number
           status?: string
           ticket_number?: string
           window_id?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -147,14 +186,31 @@ export type Database = {
         }[]
       }
       done_ticket: { Args: { p_window_id: number }; Returns: undefined }
-      get_next_ticket: {
-        Args: { p_category: string }
-        Returns: {
-          ticket_label: string
-          ticket_num: number
-          window_num: number
-        }[]
+      get_next_ticket:
+        | {
+            Args: { p_category: string }
+            Returns: {
+              ticket_label: string
+              ticket_num: number
+              window_num: number
+            }[]
+          }
+        | {
+            Args: { p_category: string; p_client_name?: string }
+            Returns: {
+              ticket_label: string
+              ticket_num: number
+              window_num: number
+            }[]
+          }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
       recall_ticket: {
         Args: { p_window_id: number }
         Returns: {
@@ -165,7 +221,7 @@ export type Database = {
       skip_ticket: { Args: { p_window_id: number }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -292,6 +348,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "operator"],
+    },
   },
 } as const
