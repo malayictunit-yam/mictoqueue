@@ -7,6 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import KioskPage from "./pages/KioskPage.tsx";
 import OperatorPage from "./pages/OperatorPage.tsx";
+import OperatorSelectPage from "./pages/OperatorSelectPage.tsx";
 import DisplayPage from "./pages/DisplayPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import AdminDisplayPage from "./pages/AdminDisplayPage.tsx";
