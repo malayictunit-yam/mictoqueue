@@ -236,14 +236,31 @@ const AdminDisplayPage = () => {
           </h2>
           <p className="text-xs text-muted-foreground mb-4">Only one media can be active at a time. It displays on the right side of the TV screen.</p>
           <input ref={adInputRef} type="file" accept="image/*,video/mp4" className="hidden" onChange={uploadAd} />
-          <button
-            onClick={() => adInputRef.current?.click()}
-            disabled={uploadingAd}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-colors active:scale-[0.98] disabled:opacity-50 mb-4"
-          >
-            <Upload className="w-4 h-4" />
-            {uploadingAd ? 'Uploading…' : 'Upload Image or Video'}
-          </button>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <button
+              onClick={() => adInputRef.current?.click()}
+              disabled={uploadingAd}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-colors active:scale-[0.98] disabled:opacity-50"
+            >
+              <Upload className="w-4 h-4" />
+              {uploadingAd ? 'Uploading…' : 'Upload File'}
+            </button>
+          </div>
+          <div className="flex gap-2 mb-4">
+            <input
+              value={adUrl}
+              onChange={e => setAdUrl(e.target.value)}
+              placeholder="Paste image or video URL…"
+              className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button
+              onClick={addAdByUrl}
+              disabled={!adUrl.trim()}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-colors active:scale-[0.98] disabled:opacity-50"
+            >
+              <LinkIcon className="w-4 h-4" /> Add URL
+            </button>
+          </div>
 
           {ads.length === 0 && <p className="text-xs text-muted-foreground">No media uploaded yet.</p>}
           <div className="space-y-3">
