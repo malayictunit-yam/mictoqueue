@@ -15,6 +15,8 @@ const OperatorPage = () => {
   const [waitingCount, setWaitingCount] = useState(0);
   const [nextInQueue, setNextInQueue] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+
   const fetchState = useCallback(async () => {
     if (!cat) return;
     const { data: servingData } = await supabase
