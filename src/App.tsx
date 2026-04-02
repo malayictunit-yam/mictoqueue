@@ -28,6 +28,14 @@ const App = () => (
           <Route path="/kiosk" element={<KioskPage />} />
           <Route path="/display" element={<DisplayPage />} />
           <Route
+            path="/operator"
+            element={
+              <ProtectedRoute>
+                <OperatorSelectPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/operator/:windowId"
             element={
               <ProtectedRoute>
