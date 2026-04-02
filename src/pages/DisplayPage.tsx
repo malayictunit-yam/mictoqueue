@@ -45,6 +45,19 @@ const DisplayPage = () => {
   const [settings, setSettings] = useState<DisplaySettings | null>(null);
   const [activeAd, setActiveAd] = useState<Ad | null>(null);
   const prevServingRef = useRef<Record<number, string | null>>({});
+  const [isWidescreen, setIsWidescreen] = useState(true);
+  const [isUltrawide, setIsUltrawide] = useState(false);
+
+  useEffect(() => {
+    const checkAspect = () => {
+      const ratio = window.innerWidth / window.innerHeight;
+      setIsWidescreen(ratio > 1.5);
+      setIsUltrawide(ratio > 2);
+    };
+    checkAspect();
+    window.addEventListener('resize', checkAspect);
+    return () => window.removeEventListener('resize', checkAspect);
+  }, []);
 
   const fetchSettings = useCallback(async () => {
     const [{ data: s }, { data: ad }, { data: wl }] = await Promise.all([
@@ -140,10 +153,10 @@ const DisplayPage = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex min-h-0">
+      <div className={`flex-1 flex min-h-0 ${isWidescreen ? 'flex-row' : 'flex-col'}`}>
         <div className="flex-1 p-4 md:p-6 overflow-auto">
           <p className="text-xs text-primary-foreground/40 uppercase tracking-widest font-medium mb-4">Now Serving</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className={`grid gap-3 md:gap-4 ${isUltrawide ? 'grid-cols-4' : isWidescreen ? 'grid-cols-2' : 'grid-cols-2'}`}>
             {windows.map(w => (
               <div key={w.windowId} className="rounded-xl overflow-hidden bg-card/5 border border-primary-foreground/10">
                 <div className={`${getWindowColor(w.windowId)} px-4 py-3 flex items-center justify-between`}>
@@ -188,9 +201,15 @@ const DisplayPage = () => {
           </div>
         </div>
 
-        <div className="w-[40%] max-w-[500px] border-l border-primary-foreground/10 flex-shrink-0">
-          <MediaPanel ad={activeAd} />
-        </div>
+        {isWidescreen ? (
+          <div className="w-[35%] max-w-[500px] border-l border-primary-foreground/10 flex-shrink-0">
+            <MediaPanel ad={activeAd} />
+          </div>
+        ) : (
+          <div className="h-[30%] border-t border-primary-foreground/10 flex-shrink-0">
+            <MediaPanel ad={activeAd} />
+          </div>
+        )}
       </div>
 
       {settings?.ticker_text && (
