@@ -109,6 +109,19 @@ const AdminDisplayPage = () => {
     fetchAll();
   };
 
+  const [adUrl, setAdUrl] = useState('');
+  const addAdByUrl = async () => {
+    const url = adUrl.trim();
+    if (!url) return;
+    try { new URL(url); } catch { toast.error('Invalid URL'); return; }
+    const lower = url.toLowerCase();
+    const isVideo = lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov') || lower.includes('video');
+    await supabase.from('ads').insert({ type: isVideo ? 'video' : 'image', file_url: url, is_active: false });
+    toast.success('Media added from URL');
+    setAdUrl('');
+    fetchAll();
+  };
+
   const toggleAdActive = async (ad: Ad) => {
     // Deactivate all first, then activate selected
     if (!ad.is_active) {
