@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES } from '@/lib/queue';
 import { Link } from 'react-router-dom';
-import { Upload, Type, Tv, Image, Film, Trash2, Check } from 'lucide-react';
+import { Upload, Type, Tv, Image, Film, Trash2, Check, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DisplaySettings {
