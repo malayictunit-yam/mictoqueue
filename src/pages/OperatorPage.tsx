@@ -7,9 +7,21 @@ import { toast } from 'sonner';
 
 const OperatorPage = () => {
   const { windowId } = useParams<{ windowId: string }>();
-  const wId = parseInt(windowId || '1');
+  const wId = parseInt(windowId || '0');
   const cat = getCategoryByWindow(wId);
   const navigate = useNavigate();
+
+  if (!cat) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-foreground mb-2">Invalid Window</p>
+          <p className="text-sm text-muted-foreground mb-4">Window "{windowId}" does not exist.</p>
+          <button onClick={() => navigate('/admin')} className="text-primary underline text-sm">Go to Admin</button>
+        </div>
+      </div>
+    );
+  }
 
   const [currentServing, setCurrentServing] = useState<{ ticket: string; name: string } | null>(null);
   const [waitingCount, setWaitingCount] = useState(0);
