@@ -11,23 +11,23 @@ const OperatorPage = () => {
   const cat = getCategoryByWindow(wId);
   const navigate = useNavigate();
 
+  const [currentServing, setCurrentServing] = useState<{ ticket: string; name: string } | null>(null);
+  const [waitingCount, setWaitingCount] = useState(0);
+  const [nextInQueue, setNextInQueue] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+
   if (!cat) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <p className="text-lg font-semibold text-foreground mb-2">Invalid Window</p>
           <p className="text-sm text-muted-foreground mb-4">Window "{windowId}" does not exist.</p>
-          <button onClick={() => navigate('/admin')} className="text-primary underline text-sm">Go to Admin</button>
+          <button onClick={() => navigate('/')} className="text-primary underline text-sm">Go Home</button>
         </div>
       </div>
     );
   }
-
-  const [currentServing, setCurrentServing] = useState<{ ticket: string; name: string } | null>(null);
-  const [waitingCount, setWaitingCount] = useState(0);
-  const [nextInQueue, setNextInQueue] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
 
   const fetchState = useCallback(async () => {
     const { data: servingData } = await supabase
