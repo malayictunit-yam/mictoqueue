@@ -45,6 +45,19 @@ const DisplayPage = () => {
   const [settings, setSettings] = useState<DisplaySettings | null>(null);
   const [activeAd, setActiveAd] = useState<Ad | null>(null);
   const prevServingRef = useRef<Record<number, string | null>>({});
+  const [isWidescreen, setIsWidescreen] = useState(true);
+  const [isUltrawide, setIsUltrawide] = useState(false);
+
+  useEffect(() => {
+    const checkAspect = () => {
+      const ratio = window.innerWidth / window.innerHeight;
+      setIsWidescreen(ratio > 1.5);
+      setIsUltrawide(ratio > 2);
+    };
+    checkAspect();
+    window.addEventListener('resize', checkAspect);
+    return () => window.removeEventListener('resize', checkAspect);
+  }, []);
 
   const fetchSettings = useCallback(async () => {
     const [{ data: s }, { data: ad }, { data: wl }] = await Promise.all([
