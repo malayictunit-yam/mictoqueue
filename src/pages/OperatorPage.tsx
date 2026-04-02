@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 const OperatorPage = () => {
   const { windowId } = useParams<{ windowId: string }>();
-  const wId = parseInt(windowId || '1');
+  const wId = parseInt(windowId || '0');
   const cat = getCategoryByWindow(wId);
   const navigate = useNavigate();
 
@@ -18,6 +18,7 @@ const OperatorPage = () => {
   const [ttsEnabled, setTtsEnabled] = useState(true);
 
   const fetchState = useCallback(async () => {
+    if (!cat) return;
     const { data: servingData } = await supabase
       .from('tickets')
       .select('ticket_number, client_name')
@@ -39,9 +40,10 @@ const OperatorPage = () => {
       .order('number', { ascending: true });
     setWaitingCount(waitingData?.length || 0);
     setNextInQueue(waitingData?.[0]?.ticket_number || null);
-  }, [wId, cat.key]);
+  }, [wId, cat]);
 
   useEffect(() => {
+    if (!cat) return;
     fetchState();
     const channel = supabase
       .channel(`operator-${wId}`)
@@ -50,7 +52,19 @@ const OperatorPage = () => {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchState, wId]);
+  }, [fetchState, wId, cat]);
+
+  if (!cat) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-foreground mb-2">Invalid Window</p>
+          <p className="text-sm text-muted-foreground mb-4">Window "{windowId}" does not exist.</p>
+          <button onClick={() => navigate('/')} className="text-primary underline text-sm">Go Home</button>
+        </div>
+      </div>
+    );
+  }
 
   const handleNext = async () => {
     setLoading(true);
