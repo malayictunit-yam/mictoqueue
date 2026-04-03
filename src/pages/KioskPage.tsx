@@ -26,12 +26,28 @@ const KioskPage = () => {
   const [error, setError] = useState('');
   const [clientName, setClientName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
-  const canTakeTicket = () => {
+  const getCooldownRemaining = useCallback(() => {
     const last = localStorage.getItem(COOLDOWN_KEY);
-    if (!last) return true;
-    return Date.now() - parseInt(last) > COOLDOWN_MS;
-  };
+    if (!last) return 0;
+    const elapsed = Date.now() - parseInt(last);
+    return Math.max(0, COOLDOWN_MS - elapsed);
+  }, []);
+
+  const canTakeTicket = () => getCooldownRemaining() === 0;
+
+  useEffect(() => {
+    const remaining = getCooldownRemaining();
+    setCooldownRemaining(remaining);
+    if (remaining <= 0) return;
+    const interval = setInterval(() => {
+      const r = getCooldownRemaining();
+      setCooldownRemaining(r);
+      if (r <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [ticket, getCooldownRemaining]);
 
   const handleSelectCategory = (category: CategoryKey) => {
     if (!canTakeTicket()) {
