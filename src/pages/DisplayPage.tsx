@@ -138,8 +138,8 @@ const DisplayPage = () => {
       .channel('display-settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'display_settings' }, () => fetchSettings())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, async () => {
-        const { data: ad } = await supabase.from('ads').select('type, file_url').eq('is_active', true).limit(1).single();
-        setActiveAd(ad || null);
+        const { data: ads } = await supabase.from('ads').select('type, file_url').eq('is_active', true);
+        setActiveAds(ads || []);
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'window_labels' }, async () => {
         const { data: wl } = await supabase.from('window_labels').select('*').order('window_id');
