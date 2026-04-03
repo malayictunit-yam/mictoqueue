@@ -197,6 +197,16 @@ const KioskPage = () => {
             {error}
           </div>
         )}
+        {cooldownRemaining > 0 && (
+          <div className="mb-4 p-4 rounded-xl bg-secondary border border-border text-center">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+              <Clock className="w-4 h-4" />
+              <span className="text-xs uppercase tracking-wider font-medium">Cooldown</span>
+            </div>
+            <p className="text-2xl font-bold font-mono text-foreground tabular-nums">{formatTime(cooldownRemaining)}</p>
+            <p className="text-xs text-muted-foreground mt-1">before you can get another ticket</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-3">
           {CATEGORIES.map((cat, i) => {
