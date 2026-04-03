@@ -49,9 +49,16 @@ const KioskPage = () => {
     return () => clearInterval(interval);
   }, [ticket, getCooldownRemaining]);
 
+  const formatTime = (ms: number) => {
+    const totalSec = Math.ceil(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  };
+
   const handleSelectCategory = (category: CategoryKey) => {
     if (!canTakeTicket()) {
-      setError('Please wait 3 minutes between tickets.');
+      setError(`Please wait ${formatTime(cooldownRemaining)} before getting another ticket.`);
       return;
     }
     setSelectedCategory(category);

@@ -110,8 +110,7 @@ const DisplayPage = () => {
     statuses.forEach(s => {
       const prev = prevServingRef.current[s.windowId];
       if (s.serving && s.serving !== prev) {
-        const nameAnnounce = s.servingName ? `, ${s.servingName},` : '';
-        speak(`Now serving ${s.serving.replace('-', ' ')}${nameAnnounce} at ${s.customLabel}`);
+        speak(`Now serving ${s.serving.replace('-', ' ')} at ${s.customLabel}`);
       }
     });
     prevServingRef.current = Object.fromEntries(statuses.map(s => [s.windowId, s.serving]));
