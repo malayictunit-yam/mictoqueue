@@ -57,7 +57,7 @@ MediaPanel.displayName = 'MediaPanel';
 const DisplayPage = () => {
   const [windows, setWindows] = useState<WindowStatus[]>([]);
   const [settings, setSettings] = useState<DisplaySettings | null>(null);
-  const [activeAd, setActiveAd] = useState<Ad | null>(null);
+  const [activeAds, setActiveAds] = useState<Ad[]>([]);
   const prevServingRef = useRef<Record<number, string | null>>({});
   const [isWidescreen, setIsWidescreen] = useState(true);
   const [isUltrawide, setIsUltrawide] = useState(false);

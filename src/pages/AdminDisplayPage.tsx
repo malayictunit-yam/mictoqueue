@@ -123,10 +123,6 @@ const AdminDisplayPage = () => {
   };
 
   const toggleAdActive = async (ad: Ad) => {
-    // Deactivate all first, then activate selected
-    if (!ad.is_active) {
-      await supabase.from('ads').update({ is_active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
-    }
     await supabase.from('ads').update({ is_active: !ad.is_active }).eq('id', ad.id);
     toast.success(ad.is_active ? 'Ad deactivated' : 'Ad activated');
     fetchAll();

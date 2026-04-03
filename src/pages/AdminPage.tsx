@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, getWindowColor } from '@/lib/queue';
-import { RotateCcw, BarChart3, AlertTriangle, Palette, LogOut } from 'lucide-react';
+import { RotateCcw, BarChart3, AlertTriangle, Palette, LogOut, Users } from 'lucide-react';
+import OperatorManager from '@/components/admin/OperatorManager';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
