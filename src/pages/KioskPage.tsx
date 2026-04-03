@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, CategoryKey, getWindowColor } from '@/lib/queue';
-import { Ticket, FileText, Shield, Building2 } from 'lucide-react';
+import { Ticket, FileText, Shield, Building2, Clock } from 'lucide-react';
 
-const COOLDOWN_MS = 3 * 60 * 1000;
+const COOLDOWN_MS = 2 * 60 * 1000;
 const COOLDOWN_KEY = 'queue_last_ticket';
 
 const ICONS: Record<string, React.ElementType> = {
