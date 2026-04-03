@@ -74,13 +74,13 @@ const DisplayPage = () => {
   }, []);
 
   const fetchSettings = useCallback(async () => {
-    const [{ data: s }, { data: ad }, { data: wl }] = await Promise.all([
+    const [{ data: s }, { data: ads }, { data: wl }] = await Promise.all([
       supabase.from('display_settings').select('*').limit(1).single(),
-      supabase.from('ads').select('type, file_url').eq('is_active', true).limit(1).single(),
+      supabase.from('ads').select('type, file_url').eq('is_active', true),
       supabase.from('window_labels').select('*').order('window_id'),
     ]);
     if (s) setSettings(s);
-    setActiveAd(ad || null);
+    setActiveAds(ads || []);
     return wl || [];
   }, []);
 
