@@ -178,7 +178,7 @@ const AdminPage = () => {
         </div>
 
         {/* Reset section */}
-        <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
+        <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Queue Controls</h2>
             <p className="text-sm text-muted-foreground mb-4">
