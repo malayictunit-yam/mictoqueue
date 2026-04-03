@@ -156,8 +156,13 @@ const AdminPage = () => {
           </div>
         </div>
 
-        {/* Display Settings link */}
+        {/* Operator Accounts */}
         <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+          <OperatorManager />
+        </div>
+
+        {/* Display Settings link */}
+        <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '320ms' }}>
           <Link
             to="/admin/display"
             className="flex items-center gap-4 p-5 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98]"
