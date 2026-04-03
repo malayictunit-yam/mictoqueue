@@ -23,20 +23,34 @@ interface Ad {
   file_url: string;
 }
 
-const MediaPanel = memo(({ ad }: { ad: Ad | null }) => {
-  if (!ad) {
+const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (ads.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % ads.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [ads.length]);
+
+  if (ads.length === 0) {
     return (
       <div className="h-full flex items-center justify-center bg-card/5">
         <p className="text-primary-foreground/20 text-sm">No advertisement</p>
       </div>
     );
   }
+
+  const ad = ads[currentIndex % ads.length];
+  if (!ad) return null;
+
   if (ad.type === 'video') {
     return (
       <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-contain bg-black" />
     );
   }
-  return <img src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
+  return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
 });
 MediaPanel.displayName = 'MediaPanel';
 
