@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, CategoryKey, getWindowColor } from '@/lib/queue';
-import { Ticket, FileText, Shield, Building2 } from 'lucide-react';
+import { Ticket, FileText, Shield, Building2, Clock } from 'lucide-react';
 
-const COOLDOWN_MS = 3 * 60 * 1000;
+const COOLDOWN_MS = 2 * 60 * 1000;
 const COOLDOWN_KEY = 'queue_last_ticket';
 
 const ICONS: Record<string, React.ElementType> = {
@@ -26,16 +26,39 @@ const KioskPage = () => {
   const [error, setError] = useState('');
   const [clientName, setClientName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
-  const canTakeTicket = () => {
+  const getCooldownRemaining = useCallback(() => {
     const last = localStorage.getItem(COOLDOWN_KEY);
-    if (!last) return true;
-    return Date.now() - parseInt(last) > COOLDOWN_MS;
+    if (!last) return 0;
+    const elapsed = Date.now() - parseInt(last);
+    return Math.max(0, COOLDOWN_MS - elapsed);
+  }, []);
+
+  const canTakeTicket = () => getCooldownRemaining() === 0;
+
+  useEffect(() => {
+    const remaining = getCooldownRemaining();
+    setCooldownRemaining(remaining);
+    if (remaining <= 0) return;
+    const interval = setInterval(() => {
+      const r = getCooldownRemaining();
+      setCooldownRemaining(r);
+      if (r <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [ticket, getCooldownRemaining]);
+
+  const formatTime = (ms: number) => {
+    const totalSec = Math.ceil(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
   };
 
   const handleSelectCategory = (category: CategoryKey) => {
     if (!canTakeTicket()) {
-      setError('Please wait 3 minutes between tickets.');
+      setError(`Please wait ${formatTime(cooldownRemaining)} before getting another ticket.`);
       return;
     }
     setSelectedCategory(category);
@@ -172,6 +195,16 @@ const KioskPage = () => {
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
             {error}
+          </div>
+        )}
+        {cooldownRemaining > 0 && (
+          <div className="mb-4 p-4 rounded-xl bg-secondary border border-border text-center">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+              <Clock className="w-4 h-4" />
+              <span className="text-xs uppercase tracking-wider font-medium">Cooldown</span>
+            </div>
+            <p className="text-2xl font-bold font-mono text-foreground tabular-nums">{formatTime(cooldownRemaining)}</p>
+            <p className="text-xs text-muted-foreground mt-1">before you can get another ticket</p>
           </div>
         )}
 

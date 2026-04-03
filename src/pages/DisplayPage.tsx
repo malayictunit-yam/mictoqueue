@@ -110,8 +110,7 @@ const DisplayPage = () => {
     statuses.forEach(s => {
       const prev = prevServingRef.current[s.windowId];
       if (s.serving && s.serving !== prev) {
-        const nameAnnounce = s.servingName ? `, ${s.servingName},` : '';
-        speak(`Now serving ${s.serving.replace('-', ' ')}${nameAnnounce} at ${s.customLabel}`);
+        speak(`Now serving ${s.serving.replace('-', ' ')} at ${s.customLabel}`);
       }
     });
     prevServingRef.current = Object.fromEntries(statuses.map(s => [s.windowId, s.serving]));
@@ -182,14 +181,9 @@ const DisplayPage = () => {
                 </div>
                 <div className="p-5 md:p-6 text-center">
                   {w.serving ? (
-                    <>
                       <p className={`font-mono text-4xl md:text-5xl font-bold ${getWindowTextColor(w.windowId)} animate-pulse leading-none tracking-wider`}>
                         {w.serving}
                       </p>
-                      {w.servingName && (
-                        <p className="text-sm text-primary-foreground/50 mt-2">{w.servingName}</p>
-                      )}
-                    </>
                   ) : (
                     <p className="text-xl text-primary-foreground/20 font-medium">—</p>
                   )}
