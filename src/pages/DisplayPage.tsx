@@ -23,27 +23,41 @@ interface Ad {
   file_url: string;
 }
 
-const MediaPanel = memo(({ ad }: { ad: Ad | null }) => {
-  if (!ad) {
+const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (ads.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % ads.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [ads.length]);
+
+  if (ads.length === 0) {
     return (
       <div className="h-full flex items-center justify-center bg-card/5">
         <p className="text-primary-foreground/20 text-sm">No advertisement</p>
       </div>
     );
   }
+
+  const ad = ads[currentIndex % ads.length];
+  if (!ad) return null;
+
   if (ad.type === 'video') {
     return (
       <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-contain bg-black" />
     );
   }
-  return <img src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
+  return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
 });
 MediaPanel.displayName = 'MediaPanel';
 
 const DisplayPage = () => {
   const [windows, setWindows] = useState<WindowStatus[]>([]);
   const [settings, setSettings] = useState<DisplaySettings | null>(null);
-  const [activeAd, setActiveAd] = useState<Ad | null>(null);
+  const [activeAds, setActiveAds] = useState<Ad[]>([]);
   const prevServingRef = useRef<Record<number, string | null>>({});
   const [isWidescreen, setIsWidescreen] = useState(true);
   const [isUltrawide, setIsUltrawide] = useState(false);
@@ -60,13 +74,13 @@ const DisplayPage = () => {
   }, []);
 
   const fetchSettings = useCallback(async () => {
-    const [{ data: s }, { data: ad }, { data: wl }] = await Promise.all([
+    const [{ data: s }, { data: ads }, { data: wl }] = await Promise.all([
       supabase.from('display_settings').select('*').limit(1).single(),
-      supabase.from('ads').select('type, file_url').eq('is_active', true).limit(1).single(),
+      supabase.from('ads').select('type, file_url').eq('is_active', true),
       supabase.from('window_labels').select('*').order('window_id'),
     ]);
     if (s) setSettings(s);
-    setActiveAd(ad || null);
+    setActiveAds(ads || []);
     return wl || [];
   }, []);
 
@@ -124,8 +138,8 @@ const DisplayPage = () => {
       .channel('display-settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'display_settings' }, () => fetchSettings())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, async () => {
-        const { data: ad } = await supabase.from('ads').select('type, file_url').eq('is_active', true).limit(1).single();
-        setActiveAd(ad || null);
+        const { data: ads } = await supabase.from('ads').select('type, file_url').eq('is_active', true);
+        setActiveAds(ads || []);
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'window_labels' }, async () => {
         const { data: wl } = await supabase.from('window_labels').select('*').order('window_id');
@@ -203,11 +217,11 @@ const DisplayPage = () => {
 
         {isWidescreen ? (
           <div className="w-[35%] max-w-[500px] border-l border-primary-foreground/10 flex-shrink-0">
-            <MediaPanel ad={activeAd} />
+            <MediaPanel ads={activeAds} />
           </div>
         ) : (
           <div className="h-[30%] border-t border-primary-foreground/10 flex-shrink-0">
-            <MediaPanel ad={activeAd} />
+            <MediaPanel ads={activeAds} />
           </div>
         )}
       </div>

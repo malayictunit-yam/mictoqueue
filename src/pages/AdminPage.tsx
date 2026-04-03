@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES, getWindowColor } from '@/lib/queue';
-import { RotateCcw, BarChart3, AlertTriangle, Palette, LogOut } from 'lucide-react';
+import { RotateCcw, BarChart3, AlertTriangle, Palette, LogOut, Users } from 'lucide-react';
+import OperatorManager from '@/components/admin/OperatorManager';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -155,8 +156,13 @@ const AdminPage = () => {
           </div>
         </div>
 
-        {/* Display Settings link */}
+        {/* Operator Accounts */}
         <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+          <OperatorManager />
+        </div>
+
+        {/* Display Settings link */}
+        <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '320ms' }}>
           <Link
             to="/admin/display"
             className="flex items-center gap-4 p-5 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98]"
@@ -172,7 +178,7 @@ const AdminPage = () => {
         </div>
 
         {/* Reset section */}
-        <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
+        <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Queue Controls</h2>
             <p className="text-sm text-muted-foreground mb-4">

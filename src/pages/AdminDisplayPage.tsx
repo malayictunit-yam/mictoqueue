@@ -123,10 +123,6 @@ const AdminDisplayPage = () => {
   };
 
   const toggleAdActive = async (ad: Ad) => {
-    // Deactivate all first, then activate selected
-    if (!ad.is_active) {
-      await supabase.from('ads').update({ is_active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
-    }
     await supabase.from('ads').update({ is_active: !ad.is_active }).eq('id', ad.id);
     toast.success(ad.is_active ? 'Ad deactivated' : 'Ad activated');
     fetchAll();
@@ -234,7 +230,7 @@ const AdminDisplayPage = () => {
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <Image className="w-4 h-4 text-muted-foreground" /> Advertisement Media
           </h2>
-          <p className="text-xs text-muted-foreground mb-4">Only one media can be active at a time. It displays on the right side of the TV screen.</p>
+          <p className="text-xs text-muted-foreground mb-4">Multiple media can be active simultaneously. They rotate every 8 seconds on the TV display.</p>
           <input ref={adInputRef} type="file" accept="image/*,video/mp4" className="hidden" onChange={uploadAd} />
           <div className="flex flex-wrap gap-2 mb-4">
             <button
