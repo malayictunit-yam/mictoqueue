@@ -217,7 +217,7 @@ const DisplayPage = () => {
 
         {isWidescreen ? (
           <div className="w-[35%] max-w-[500px] border-l border-primary-foreground/10 flex-shrink-0">
-            <MediaPanel ad={activeAd} />
+            <MediaPanel ads={activeAds} />
           </div>
         ) : (
           <div className="h-[30%] border-t border-primary-foreground/10 flex-shrink-0">
