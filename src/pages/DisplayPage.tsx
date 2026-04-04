@@ -158,15 +158,11 @@ const DisplayPage = () => {
         {settings?.logo_url && (
           <img src={settings.logo_url} alt="Logo" className="h-12 w-auto object-contain" />
         )}
-        <div className="flex-1">
+        <div>
           <h1 className="text-xl md:text-2xl font-extrabold text-primary-foreground tracking-tight leading-tight">
             {settings?.department_name || 'Government Services'}
           </h1>
           <p className="text-primary-foreground/40 text-[10px] uppercase tracking-widest">Queue Display</p>
-        </div>
-        <div className="text-right flex-shrink-0">
-          <p className="text-[10px] text-primary-foreground/40 uppercase tracking-widest">Get your ticket at</p>
-          <p className="text-sm font-semibold text-primary-foreground/80 tracking-wide">mictoqueue.lovable.app</p>
         </div>
       </header>
 
