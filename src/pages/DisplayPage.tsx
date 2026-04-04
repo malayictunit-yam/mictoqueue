@@ -17,6 +17,7 @@ interface DisplaySettings {
   department_name: string;
   logo_url: string | null;
   ticker_text: string;
+  ad_fit_mode: string;
 }
 
 interface Ad {
