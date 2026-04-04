@@ -232,6 +232,40 @@ const AdminDisplayPage = () => {
             <Image className="w-4 h-4 text-muted-foreground" /> Advertisement Media
           </h2>
           <p className="text-xs text-muted-foreground mb-4">Multiple media can be active simultaneously. They rotate every 8 seconds on the TV display.</p>
+          <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-secondary/50 border border-border">
+            <span className="text-xs text-muted-foreground font-medium">Scale Mode:</span>
+            <div className="flex rounded-lg overflow-hidden border border-border">
+              <button
+                onClick={async () => {
+                  if (!settings) return;
+                  await supabase.from('display_settings').update({ ad_fit_mode: 'fit' }).eq('id', settings.id);
+                  toast.success('Scale mode set to Fit');
+                  fetchAll();
+                }}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  settings?.ad_fit_mode === 'fit' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary'
+                }`}
+              >
+                Fit
+              </button>
+              <button
+                onClick={async () => {
+                  if (!settings) return;
+                  await supabase.from('display_settings').update({ ad_fit_mode: 'fill' }).eq('id', settings.id);
+                  toast.success('Scale mode set to Fill');
+                  fetchAll();
+                }}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  settings?.ad_fit_mode !== 'fit' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary'
+                }`}
+              >
+                Fill
+              </button>
+            </div>
+            <span className="text-[10px] text-muted-foreground">
+              {settings?.ad_fit_mode === 'fit' ? 'Shows full media with letterboxing' : 'Fills the panel, may crop edges'}
+            </span>
+          </div>
           <input ref={adInputRef} type="file" accept="image/*,video/mp4" className="hidden" onChange={uploadAd} />
           <div className="flex flex-wrap gap-2 mb-4">
             <button
