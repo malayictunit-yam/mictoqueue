@@ -1,0 +1,1 @@
+ALTER TABLE public.display_settings ADD COLUMN ad_fit_mode text NOT NULL DEFAULT 'fill';

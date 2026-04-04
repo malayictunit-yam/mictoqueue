@@ -61,6 +61,7 @@ export type Database = {
       }
       display_settings: {
         Row: {
+          ad_fit_mode: string
           department_name: string
           id: string
           logo_url: string | null
@@ -68,6 +69,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ad_fit_mode?: string
           department_name?: string
           id?: string
           logo_url?: string | null
@@ -75,6 +77,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ad_fit_mode?: string
           department_name?: string
           id?: string
           logo_url?: string | null

@@ -17,6 +17,7 @@ interface DisplaySettings {
   department_name: string;
   logo_url: string | null;
   ticker_text: string;
+  ad_fit_mode: string;
 }
 
 interface Ad {
@@ -24,7 +25,7 @@ interface Ad {
   file_url: string;
 }
 
-const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
+const MediaPanel = memo(({ ads, fitMode }: { ads: Ad[]; fitMode: string }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -48,9 +49,11 @@ const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
 
   const adKind = resolveAdKind(ad);
 
+  const objectFit = fitMode === 'fit' ? 'object-contain' : 'object-cover';
+
   if (adKind === 'video') {
     return (
-      <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-cover bg-black" />
+      <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className={`w-full h-full ${objectFit} bg-black`} />
     );
   }
 
@@ -61,14 +64,13 @@ const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
         src={ad.file_url}
         title="Advertisement website"
         className="w-full h-full border-0 bg-background"
-        style={{ transform: 'scale(1)', transformOrigin: 'top left' }}
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
       />
     );
   }
 
-  return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className="w-full h-full object-cover bg-black" />;
+  return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className={`w-full h-full ${objectFit} bg-black`} />;
 });
 MediaPanel.displayName = 'MediaPanel';
 
@@ -229,11 +231,11 @@ const DisplayPage = () => {
 
         {isWidescreen ? (
           <div className="w-[35%] max-w-[500px] border-l border-primary-foreground/10 flex-shrink-0">
-            <MediaPanel ads={activeAds} />
+            <MediaPanel ads={activeAds} fitMode={settings?.ad_fit_mode || 'fill'} />
           </div>
         ) : (
           <div className="h-[30%] border-t border-primary-foreground/10 flex-shrink-0">
-            <MediaPanel ads={activeAds} />
+            <MediaPanel ads={activeAds} fitMode={settings?.ad_fit_mode || 'fill'} />
           </div>
         )}
       </div>
