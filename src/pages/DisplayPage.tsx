@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveAdKind } from '@/lib/displayAds';
 import { CATEGORIES, getWindowColor, getWindowTextColor, speak } from '@/lib/queue';
 
 interface WindowStatus {
@@ -45,11 +46,27 @@ const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
   const ad = ads[currentIndex % ads.length];
   if (!ad) return null;
 
-  if (ad.type === 'video') {
+  const adKind = resolveAdKind(ad);
+
+  if (adKind === 'video') {
     return (
       <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-contain bg-black" />
     );
   }
+
+  if (adKind === 'website') {
+    return (
+      <iframe
+        key={ad.file_url}
+        src={ad.file_url}
+        title="Advertisement website"
+        className="w-full h-full border-0 bg-background"
+        loading="eager"
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    );
+  }
+
   return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
 });
 MediaPanel.displayName = 'MediaPanel';

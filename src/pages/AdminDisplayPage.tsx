@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CATEGORIES } from '@/lib/queue';
+import { getAdDisplayName, inferAdKindFromUrl, resolveAdKind } from '@/lib/displayAds';
 import { Link } from 'react-router-dom';
-import { Upload, Type, Tv, Image, Film, Trash2, Check, Link as LinkIcon } from 'lucide-react';
+import { Upload, Type, Tv, Image, Film, Trash2, Check, Link as LinkIcon, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DisplaySettings {
@@ -114,9 +115,8 @@ const AdminDisplayPage = () => {
     const url = adUrl.trim();
     if (!url) return;
     try { new URL(url); } catch { toast.error('Invalid URL'); return; }
-    const lower = url.toLowerCase();
-    const isVideo = lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov') || lower.includes('video');
-    await supabase.from('ads').insert({ type: isVideo ? 'video' : 'image', file_url: url, is_active: false });
+    const type = inferAdKindFromUrl(url);
+    await supabase.from('ads').insert({ type, file_url: url, is_active: false });
     toast.success('Media added from URL');
     setAdUrl('');
     fetchAll();
@@ -260,18 +260,24 @@ const AdminDisplayPage = () => {
 
           {ads.length === 0 && <p className="text-xs text-muted-foreground">No media uploaded yet.</p>}
           <div className="space-y-3">
-            {ads.map(ad => (
+            {ads.map(ad => {
+              const adKind = resolveAdKind(ad);
+              const adName = getAdDisplayName(ad.file_url, adKind);
+
+              return (
               <div key={ad.id} className={`flex items-center gap-3 p-3 rounded-lg border ${ad.is_active ? 'border-primary bg-primary/5' : 'border-border'}`}>
                 <div className="w-16 h-12 rounded-md overflow-hidden bg-secondary flex-shrink-0 flex items-center justify-center">
-                  {ad.type === 'image' ? (
+                  {adKind === 'image' ? (
                     <img src={ad.file_url} alt="" className="w-full h-full object-cover" />
+                  ) : adKind === 'website' ? (
+                    <Globe className="w-5 h-5 text-muted-foreground" />
                   ) : (
                     <Film className="w-5 h-5 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground capitalize">{ad.type}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{ad.file_url.split('/').pop()}</p>
+                  <p className="text-xs font-medium text-foreground capitalize">{adKind}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{adName}</p>
                 </div>
                 <button
                   onClick={() => toggleAdActive(ad)}
@@ -287,7 +293,7 @@ const AdminDisplayPage = () => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            ))}
+            )})}
           </div>
         </section>
       </div>
