@@ -25,7 +25,7 @@ interface Ad {
   file_url: string;
 }
 
-const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
+const MediaPanel = memo(({ ads, fitMode }: { ads: Ad[]; fitMode: string }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
