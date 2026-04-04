@@ -50,7 +50,7 @@ const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
 
   if (adKind === 'video') {
     return (
-      <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-contain bg-black" />
+      <video key={ad.file_url} src={ad.file_url} autoPlay loop muted playsInline className="w-full h-full object-cover bg-black" />
     );
   }
 
@@ -61,13 +61,14 @@ const MediaPanel = memo(({ ads }: { ads: Ad[] }) => {
         src={ad.file_url}
         title="Advertisement website"
         className="w-full h-full border-0 bg-background"
+        style={{ transform: 'scale(1)', transformOrigin: 'top left' }}
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
       />
     );
   }
 
-  return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className="w-full h-full object-contain bg-black" />;
+  return <img key={ad.file_url} src={ad.file_url} alt="Advertisement" className="w-full h-full object-cover bg-black" />;
 });
 MediaPanel.displayName = 'MediaPanel';
 
