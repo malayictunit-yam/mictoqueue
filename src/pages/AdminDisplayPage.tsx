@@ -117,7 +117,8 @@ const AdminDisplayPage = () => {
     if (!url) return;
     try { new URL(url); } catch { toast.error('Invalid URL'); return; }
     const type = inferAdKindFromUrl(url);
-    await supabase.from('ads').insert({ type, file_url: url, is_active: false });
+    const { error } = await supabase.from('ads').insert({ type, file_url: url, is_active: false });
+    if (error) { toast.error('Failed to add media: ' + error.message); return; }
     toast.success('Media added from URL');
     setAdUrl('');
     fetchAll();
