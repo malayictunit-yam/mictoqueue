@@ -22,10 +22,24 @@ const LoginPage = () => {
         if (error) throw error;
         toast.success('Account created! Please check your email to verify.');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
         toast.success('Logged in');
-        navigate('/admin');
+        
+        // Check user role and redirect accordingly
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', signInData.user.id);
+        
+        const userRoles = roles?.map(r => r.role) || [];
+        if (userRoles.includes('admin')) {
+          navigate('/admin');
+        } else if (userRoles.includes('operator')) {
+          navigate('/operator');
+        } else {
+          navigate('/');
+        }
       }
     } catch (err: any) {
       toast.error(err.message || 'Authentication failed');
