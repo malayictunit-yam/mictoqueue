@@ -12,6 +12,7 @@ import DisplayPage from "./pages/DisplayPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import AdminDisplayPage from "./pages/AdminDisplayPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
+import PrintQRPage from "./pages/PrintQRPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/kiosk" element={<KioskPage />} />
           <Route path="/display" element={<DisplayPage />} />
+          <Route path="/print-qr" element={<PrintQRPage />} />
           <Route
             path="/operator"
             element={
