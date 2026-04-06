@@ -1,7 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { Ticket } from 'lucide-react';
 
-const KIOSK_URL = `${window.location.origin}/kiosk`;
+const KIOSK_URL = 'https://mictoqueue.lovable.app/kiosk';
 
 const PrintQRPage = () => {
   return (
