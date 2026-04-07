@@ -101,7 +101,7 @@ const DisplayPage = () => {
     ]);
     if (s) setSettings(s);
     setActiveAds(ads || []);
-    return wl || [];
+    return wl || [] as { window_id: number; label: string; is_active: boolean }[];
   }, []);
 
   const fetchQueue = useCallback(async (windowLabels?: { window_id: number; label: string }[]) => {
