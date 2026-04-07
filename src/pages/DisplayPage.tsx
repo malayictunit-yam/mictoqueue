@@ -111,7 +111,12 @@ const DisplayPage = () => {
       .in('status', ['serving', 'waiting'])
       .order('number', { ascending: true });
 
-    const statuses = CATEGORIES.map(cat => {
+    const statuses = CATEGORIES
+      .filter(cat => {
+        const wl = windowLabels?.find(w => w.window_id === cat.window);
+        return !wl || wl.is_active !== false;
+      })
+      .map(cat => {
       const catTickets = tickets?.filter(t => t.category === cat.key) || [];
       const servingTicket = catTickets.find(t => t.status === 'serving');
       const waitingTickets = catTickets.filter(t => t.status === 'waiting');
