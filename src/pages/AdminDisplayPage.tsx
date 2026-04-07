@@ -19,6 +19,7 @@ interface WindowLabel {
   window_id: number;
   label: string;
   category: string;
+  is_active: boolean;
 }
 
 interface Ad {
