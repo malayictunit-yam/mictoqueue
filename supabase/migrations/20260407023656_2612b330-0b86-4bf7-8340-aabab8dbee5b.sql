@@ -1,0 +1,1 @@
+ALTER TABLE public.window_labels ADD COLUMN is_active boolean NOT NULL DEFAULT true;
