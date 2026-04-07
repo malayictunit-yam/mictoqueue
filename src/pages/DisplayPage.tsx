@@ -143,7 +143,7 @@ const DisplayPage = () => {
   }, []);
 
   useEffect(() => {
-    let windowLabelsCache: { window_id: number; label: string }[] = [];
+    let windowLabelsCache: { window_id: number; label: string; is_active: boolean }[] = [];
     const init = async () => {
       const wl = await fetchSettings();
       windowLabelsCache = wl;
