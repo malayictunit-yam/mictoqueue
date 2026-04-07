@@ -19,6 +19,7 @@ interface WindowLabel {
   window_id: number;
   label: string;
   category: string;
+  is_active: boolean;
 }
 
 interface Ad {
@@ -92,6 +93,12 @@ const AdminDisplayPage = () => {
   const updateWindowLabel = async (wl: WindowLabel, newLabel: string) => {
     await supabase.from('window_labels').update({ label: newLabel }).eq('id', wl.id);
     toast.success(`Window ${wl.window_id} label updated`);
+    fetchAll();
+  };
+
+  const toggleWindowActive = async (wl: WindowLabel) => {
+    await supabase.from('window_labels').update({ is_active: !wl.is_active }).eq('id', wl.id);
+    toast.success(`Window ${wl.window_id} ${wl.is_active ? 'deactivated' : 'activated'}`);
     fetchAll();
   };
 
@@ -209,7 +216,13 @@ const AdminDisplayPage = () => {
             {windowLabels.map(wl => {
               const cat = CATEGORIES.find(c => c.key === wl.category);
               return (
-                <div key={wl.id} className="flex items-center gap-3">
+                <div key={wl.id} className={`flex items-center gap-3 p-3 rounded-lg border ${wl.is_active ? 'border-border' : 'border-border bg-muted/50 opacity-60'}`}>
+                  <button
+                    onClick={() => toggleWindowActive(wl)}
+                    className={`flex-shrink-0 w-10 h-6 rounded-full relative transition-colors ${wl.is_active ? 'bg-primary' : 'bg-input'}`}
+                  >
+                    <span className={`block w-5 h-5 rounded-full bg-background shadow-lg transition-transform absolute top-0.5 ${wl.is_active ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                  </button>
                   <span className="text-xs text-muted-foreground w-8 flex-shrink-0">W{wl.window_id}</span>
                   <input
                     defaultValue={wl.label}
@@ -219,12 +232,13 @@ const AdminDisplayPage = () => {
                     className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 rounded">
-                    {cat?.key} (locked)
+                    {cat?.key}
                   </span>
                 </div>
               );
             })}
           </div>
+          <p className="text-[10px] text-muted-foreground mt-3">Deactivating a window hides it from the TV display and the public kiosk.</p>
         </section>
 
         {/* 3. Advertisement */}

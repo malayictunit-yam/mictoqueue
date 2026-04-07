@@ -101,17 +101,22 @@ const DisplayPage = () => {
     ]);
     if (s) setSettings(s);
     setActiveAds(ads || []);
-    return wl || [];
+    return wl || [] as { window_id: number; label: string; is_active: boolean }[];
   }, []);
 
-  const fetchQueue = useCallback(async (windowLabels?: { window_id: number; label: string }[]) => {
+  const fetchQueue = useCallback(async (windowLabels?: { window_id: number; label: string; is_active: boolean }[]) => {
     const { data: tickets } = await supabase
       .from('tickets')
       .select('*')
       .in('status', ['serving', 'waiting'])
       .order('number', { ascending: true });
 
-    const statuses = CATEGORIES.map(cat => {
+    const statuses = CATEGORIES
+      .filter(cat => {
+        const wl = windowLabels?.find(w => w.window_id === cat.window);
+        return !wl || wl.is_active !== false;
+      })
+      .map(cat => {
       const catTickets = tickets?.filter(t => t.category === cat.key) || [];
       const servingTicket = catTickets.find(t => t.status === 'serving');
       const waitingTickets = catTickets.filter(t => t.status === 'waiting');
@@ -138,7 +143,7 @@ const DisplayPage = () => {
   }, []);
 
   useEffect(() => {
-    let windowLabelsCache: { window_id: number; label: string }[] = [];
+    let windowLabelsCache: { window_id: number; label: string; is_active: boolean }[] = [];
     const init = async () => {
       const wl = await fetchSettings();
       windowLabelsCache = wl;

@@ -159,18 +159,21 @@ export type Database = {
         Row: {
           category: string
           id: string
+          is_active: boolean
           label: string
           window_id: number
         }
         Insert: {
           category: string
           id?: string
+          is_active?: boolean
           label: string
           window_id: number
         }
         Update: {
           category?: string
           id?: string
+          is_active?: boolean
           label?: string
           window_id?: number
         }
