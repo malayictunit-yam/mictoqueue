@@ -104,7 +104,7 @@ const DisplayPage = () => {
     return wl || [] as { window_id: number; label: string; is_active: boolean }[];
   }, []);
 
-  const fetchQueue = useCallback(async (windowLabels?: { window_id: number; label: string }[]) => {
+  const fetchQueue = useCallback(async (windowLabels?: { window_id: number; label: string; is_active: boolean }[]) => {
     const { data: tickets } = await supabase
       .from('tickets')
       .select('*')
