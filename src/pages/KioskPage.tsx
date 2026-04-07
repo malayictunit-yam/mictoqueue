@@ -13,6 +13,11 @@ const ICONS: Record<string, React.ElementType> = {
   ATO: Ticket,
 };
 
+interface ActiveCategory {
+  key: string;
+  is_active: boolean;
+}
+
 interface TicketResult {
   label: string;
   window: number;
@@ -27,6 +32,23 @@ const KioskPage = () => {
   const [clientName, setClientName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const fetchActive = async () => {
+      const { data } = await supabase.from('window_labels').select('category, is_active');
+      if (data) {
+        setActiveCategories(new Set(data.filter(w => w.is_active).map(w => w.category)));
+      }
+    };
+    fetchActive();
+
+    const channel = supabase
+      .channel('kiosk-window-labels')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'window_labels' }, () => fetchActive())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const getCooldownRemaining = useCallback(() => {
     const last = localStorage.getItem(COOLDOWN_KEY);
@@ -209,7 +231,7 @@ const KioskPage = () => {
         )}
 
         <div className="grid grid-cols-1 gap-3">
-          {CATEGORIES.map((cat, i) => {
+          {CATEGORIES.filter(cat => activeCategories.has(cat.key)).map((cat, i) => {
             const Icon = ICONS[cat.key];
             return (
               <button
