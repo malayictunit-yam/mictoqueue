@@ -96,6 +96,12 @@ const AdminDisplayPage = () => {
     fetchAll();
   };
 
+  const toggleWindowActive = async (wl: WindowLabel) => {
+    await supabase.from('window_labels').update({ is_active: !wl.is_active }).eq('id', wl.id);
+    toast.success(`Window ${wl.window_id} ${wl.is_active ? 'deactivated' : 'activated'}`);
+    fetchAll();
+  };
+
   const uploadAd = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
