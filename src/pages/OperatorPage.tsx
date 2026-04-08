@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getCategoryByWindow, getWindowColor, getWindowBorderColor, speak } from '@/lib/queue';
-import { SkipForward, RotateCcw, CheckCircle2, ChevronRight, Volume2, LogOut } from 'lucide-react';
+import { SkipForward, RotateCcw, CheckCircle2, ChevronRight, Volume2, LogOut, Undo2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const OperatorPage = () => {
