@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getCategoryByWindow, getWindowColor, getWindowBorderColor, speak } from '@/lib/queue';
-import { SkipForward, RotateCcw, CheckCircle2, ChevronRight, Volume2, LogOut } from 'lucide-react';
+import { SkipForward, RotateCcw, CheckCircle2, ChevronRight, Volume2, LogOut, Undo2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const OperatorPage = () => {
@@ -101,6 +101,23 @@ const OperatorPage = () => {
     setLoading(false);
   };
 
+  const handleUndo = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.rpc('undo_last_call', { p_window_id: wId });
+    if (error) {
+      toast.error('Failed to undo');
+    } else {
+      const row = data?.[0];
+      if (row?.restored_ticket) {
+        toast.success(`Restored ticket ${row.restored_ticket}`);
+      } else {
+        toast.info('Nothing to undo');
+      }
+    }
+    await fetchState();
+    setLoading(false);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success('Logged out');
@@ -177,7 +194,7 @@ const OperatorPage = () => {
             <ChevronRight className="w-6 h-6" />
             Call Next
           </button>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             <button
               onClick={handleRecall}
               disabled={loading || !currentServing}
@@ -201,6 +218,14 @@ const OperatorPage = () => {
             >
               <CheckCircle2 className="w-5 h-5" />
               <span className="text-xs">Done</span>
+            </button>
+            <button
+              onClick={handleUndo}
+              disabled={loading}
+              className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-destructive/30 text-destructive font-medium hover:bg-destructive/10 transition-colors active:scale-[0.97] disabled:opacity-40"
+            >
+              <Undo2 className="w-5 h-5" />
+              <span className="text-xs">Undo</span>
             </button>
           </div>
         </div>
