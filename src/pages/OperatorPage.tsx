@@ -194,7 +194,7 @@ const OperatorPage = () => {
             <ChevronRight className="w-6 h-6" />
             Call Next
           </button>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             <button
               onClick={handleRecall}
               disabled={loading || !currentServing}
@@ -218,6 +218,14 @@ const OperatorPage = () => {
             >
               <CheckCircle2 className="w-5 h-5" />
               <span className="text-xs">Done</span>
+            </button>
+            <button
+              onClick={handleUndo}
+              disabled={loading}
+              className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-destructive/30 text-destructive font-medium hover:bg-destructive/10 transition-colors active:scale-[0.97] disabled:opacity-40"
+            >
+              <Undo2 className="w-5 h-5" />
+              <span className="text-xs">Undo</span>
             </button>
           </div>
         </div>
