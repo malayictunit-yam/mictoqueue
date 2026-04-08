@@ -101,6 +101,23 @@ const OperatorPage = () => {
     setLoading(false);
   };
 
+  const handleUndo = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.rpc('undo_last_call', { p_window_id: wId });
+    if (error) {
+      toast.error('Failed to undo');
+    } else {
+      const row = data?.[0];
+      if (row?.restored_ticket) {
+        toast.success(`Restored ticket ${row.restored_ticket}`);
+      } else {
+        toast.info('Nothing to undo');
+      }
+    }
+    await fetchState();
+    setLoading(false);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success('Logged out');
