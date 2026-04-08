@@ -225,6 +225,13 @@ export type Database = {
         }[]
       }
       skip_ticket: { Args: { p_window_id: number }; Returns: undefined }
+      undo_last_call: {
+        Args: { p_window_id: number }
+        Returns: {
+          restored_ticket: string
+          reverted_ticket: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "operator"
