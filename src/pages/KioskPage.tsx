@@ -33,12 +33,21 @@ const KioskPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
+  const [labelOverrides, setLabelOverrides] = useState<Record<string, string>>({});
+
+  const getCatLabel = useCallback(
+    (key: string, fallback: string) => labelOverrides[key] || fallback,
+    [labelOverrides]
+  );
 
   useEffect(() => {
     const fetchActive = async () => {
-      const { data } = await supabase.from('window_labels').select('category, is_active');
+      const { data } = await supabase.from('window_labels').select('category, is_active, label');
       if (data) {
         setActiveCategories(new Set(data.filter(w => w.is_active).map(w => w.category)));
+        const map: Record<string, string> = {};
+        data.forEach(w => { if (w.label) map[w.category] = w.label; });
+        setLabelOverrides(map);
       }
     };
     fetchActive();
@@ -131,7 +140,7 @@ const KioskPage = () => {
             </div>
             <div className="p-6 text-center space-y-3">
               <p className="text-foreground font-semibold">{ticket.clientName}</p>
-              <p className="text-muted-foreground text-sm">{cat.label}</p>
+              <p className="text-muted-foreground text-sm">{getCatLabel(cat.key, cat.label)}</p>
               <div className="bg-secondary rounded-lg p-4">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Proceed to</p>
                 <p className="text-2xl font-bold text-foreground">Window {ticket.window}</p>
@@ -160,7 +169,7 @@ const KioskPage = () => {
             <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${getWindowColor(cat.window)} mb-4`}>
               {(() => { const Icon = ICONS[cat.key]; return <Icon className="w-7 h-7 text-primary-foreground" />; })()}
             </div>
-            <h1 className="text-2xl font-bold text-foreground">{cat.label}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{getCatLabel(cat.key, cat.label)}</h1>
             <p className="text-muted-foreground text-sm mt-1">Enter your name to get a ticket</p>
           </div>
 
@@ -244,7 +253,7 @@ const KioskPage = () => {
                   <Icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground">{cat.label}</p>
+                  <p className="font-semibold text-foreground">{getCatLabel(cat.key, cat.label)}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{cat.description}</p>
                 </div>
                 <div className="flex-shrink-0 text-xs font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-md">
