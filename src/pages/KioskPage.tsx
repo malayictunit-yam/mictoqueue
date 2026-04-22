@@ -33,12 +33,21 @@ const KioskPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
+  const [labelOverrides, setLabelOverrides] = useState<Record<string, string>>({});
+
+  const getCatLabel = useCallback(
+    (key: string, fallback: string) => labelOverrides[key] || fallback,
+    [labelOverrides]
+  );
 
   useEffect(() => {
     const fetchActive = async () => {
-      const { data } = await supabase.from('window_labels').select('category, is_active');
+      const { data } = await supabase.from('window_labels').select('category, is_active, label');
       if (data) {
         setActiveCategories(new Set(data.filter(w => w.is_active).map(w => w.category)));
+        const map: Record<string, string> = {};
+        data.forEach(w => { if (w.label) map[w.category] = w.label; });
+        setLabelOverrides(map);
       }
     };
     fetchActive();
