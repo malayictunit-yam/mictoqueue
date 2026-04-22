@@ -161,6 +161,7 @@ export type Database = {
           id: string
           is_active: boolean
           label: string
+          sub_label: string
           window_id: number
         }
         Insert: {
@@ -168,6 +169,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           label: string
+          sub_label?: string
           window_id: number
         }
         Update: {
@@ -175,6 +177,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           label?: string
+          sub_label?: string
           window_id?: number
         }
         Relationships: []
