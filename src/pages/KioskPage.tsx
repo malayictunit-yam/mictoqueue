@@ -140,7 +140,7 @@ const KioskPage = () => {
             </div>
             <div className="p-6 text-center space-y-3">
               <p className="text-foreground font-semibold">{ticket.clientName}</p>
-              <p className="text-muted-foreground text-sm">{cat.label}</p>
+              <p className="text-muted-foreground text-sm">{getCatLabel(cat.key, cat.label)}</p>
               <div className="bg-secondary rounded-lg p-4">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Proceed to</p>
                 <p className="text-2xl font-bold text-foreground">Window {ticket.window}</p>
