@@ -34,20 +34,31 @@ const KioskPage = () => {
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
   const [labelOverrides, setLabelOverrides] = useState<Record<string, string>>({});
+  const [subLabelOverrides, setSubLabelOverrides] = useState<Record<string, string>>({});
 
   const getCatLabel = useCallback(
     (key: string, fallback: string) => labelOverrides[key] || fallback,
     [labelOverrides]
   );
 
+  const getCatSubLabel = useCallback(
+    (key: string, fallback: string) => subLabelOverrides[key] || fallback,
+    [subLabelOverrides]
+  );
+
   useEffect(() => {
     const fetchActive = async () => {
-      const { data } = await supabase.from('window_labels').select('category, is_active, label');
+      const { data } = await supabase.from('window_labels').select('category, is_active, label, sub_label');
       if (data) {
         setActiveCategories(new Set(data.filter(w => w.is_active).map(w => w.category)));
         const map: Record<string, string> = {};
-        data.forEach(w => { if (w.label) map[w.category] = w.label; });
+        const subMap: Record<string, string> = {};
+        data.forEach(w => {
+          if (w.label) map[w.category] = w.label;
+          if (w.sub_label) subMap[w.category] = w.sub_label;
+        });
         setLabelOverrides(map);
+        setSubLabelOverrides(subMap);
       }
     };
     fetchActive();
@@ -254,7 +265,7 @@ const KioskPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground">{getCatLabel(cat.key, cat.label)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{cat.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{getCatSubLabel(cat.key, cat.description)}</p>
                 </div>
                 <div className="flex-shrink-0 text-xs font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-md">
                   W{cat.window}

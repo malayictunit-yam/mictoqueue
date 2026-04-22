@@ -18,6 +18,7 @@ interface WindowLabel {
   id: string;
   window_id: number;
   label: string;
+  sub_label: string;
   category: string;
   is_active: boolean;
 }
@@ -93,6 +94,12 @@ const AdminDisplayPage = () => {
   const updateWindowLabel = async (wl: WindowLabel, newLabel: string) => {
     await supabase.from('window_labels').update({ label: newLabel }).eq('id', wl.id);
     toast.success(`Window ${wl.window_id} label updated`);
+    fetchAll();
+  };
+
+  const updateWindowSubLabel = async (wl: WindowLabel, newSubLabel: string) => {
+    await supabase.from('window_labels').update({ sub_label: newSubLabel }).eq('id', wl.id);
+    toast.success(`Window ${wl.window_id} sub-label updated`);
     fetchAll();
   };
 
@@ -216,22 +223,33 @@ const AdminDisplayPage = () => {
             {windowLabels.map(wl => {
               const cat = CATEGORIES.find(c => c.key === wl.category);
               return (
-                <div key={wl.id} className={`flex items-center gap-3 p-3 rounded-lg border ${wl.is_active ? 'border-border' : 'border-border bg-muted/50 opacity-60'}`}>
+              <div key={wl.id} className={`flex items-start gap-3 p-3 rounded-lg border ${wl.is_active ? 'border-border' : 'border-border bg-muted/50 opacity-60'}`}>
                   <button
                     onClick={() => toggleWindowActive(wl)}
-                    className={`flex-shrink-0 w-10 h-6 rounded-full relative transition-colors ${wl.is_active ? 'bg-primary' : 'bg-input'}`}
+                    className={`flex-shrink-0 mt-1 w-10 h-6 rounded-full relative transition-colors ${wl.is_active ? 'bg-primary' : 'bg-input'}`}
                   >
                     <span className={`block w-5 h-5 rounded-full bg-background shadow-lg transition-transform absolute top-0.5 ${wl.is_active ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
                   </button>
-                  <span className="text-xs text-muted-foreground w-8 flex-shrink-0">W{wl.window_id}</span>
-                  <input
-                    defaultValue={wl.label}
-                    onBlur={e => {
-                      if (e.target.value !== wl.label) updateWindowLabel(wl, e.target.value);
-                    }}
-                    className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 rounded">
+                  <span className="text-xs text-muted-foreground w-8 flex-shrink-0 mt-2.5">W{wl.window_id}</span>
+                  <div className="flex-1 space-y-2">
+                    <input
+                      defaultValue={wl.label}
+                      placeholder="Window name"
+                      onBlur={e => {
+                        if (e.target.value !== wl.label) updateWindowLabel(wl, e.target.value);
+                      }}
+                      className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      defaultValue={wl.sub_label || ''}
+                      placeholder="Sub-label (description shown on kiosk)"
+                      onBlur={e => {
+                        if (e.target.value !== (wl.sub_label || '')) updateWindowSubLabel(wl, e.target.value);
+                      }}
+                      className="w-full bg-secondary border border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 rounded mt-2.5">
                     {cat?.key}
                   </span>
                 </div>
