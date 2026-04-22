@@ -253,7 +253,7 @@ const KioskPage = () => {
                   <Icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground">{cat.label}</p>
+                  <p className="font-semibold text-foreground">{getCatLabel(cat.key, cat.label)}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{cat.description}</p>
                 </div>
                 <div className="flex-shrink-0 text-xs font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-md">
