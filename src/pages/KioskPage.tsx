@@ -169,7 +169,7 @@ const KioskPage = () => {
             <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${getWindowColor(cat.window)} mb-4`}>
               {(() => { const Icon = ICONS[cat.key]; return <Icon className="w-7 h-7 text-primary-foreground" />; })()}
             </div>
-            <h1 className="text-2xl font-bold text-foreground">{cat.label}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{getCatLabel(cat.key, cat.label)}</h1>
             <p className="text-muted-foreground text-sm mt-1">Enter your name to get a ticket</p>
           </div>
 
