@@ -27,6 +27,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/kiosk" element={<KioskPage />} />
           <Route path="/display" element={<DisplayPage />} />
           <Route path="/print-qr" element={<PrintQRPage />} />
