@@ -69,7 +69,7 @@ const LoginPage = () => {
           </div>
           <h1 className="text-2xl font-bold text-foreground">Staff Login</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {isSignUp ? 'Create an account' : 'Sign in to access admin & operator panels'}
+            {isForgot ? 'Enter your email to reset your password' : isSignUp ? 'Create an account' : 'Sign in to access admin & operator panels'}
           </p>
         </div>
 
