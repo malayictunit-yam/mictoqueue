@@ -154,6 +154,35 @@ const AdminPage = () => {
                       <p className="text-[10px] text-muted-foreground uppercase">Skipped</p>
                     </div>
                   </div>
+                  <div className="px-4 pb-4">
+                    {confirmCategory === cat.key ? (
+                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
+                        <p className="text-xs text-destructive flex-1">Delete pending tickets for {cat.key}?</p>
+                        <button
+                          onClick={() => runReset(cat.key)}
+                          disabled={resetting}
+                          className="px-3 py-1.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-medium hover:opacity-90 disabled:opacity-50"
+                        >
+                          {resetting ? '…' : 'Confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmCategory(null)}
+                          className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setConfirmReset(false); setConfirmCategory(cat.key); }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        Reset This Queue
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
