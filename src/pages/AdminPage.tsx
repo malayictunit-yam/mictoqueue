@@ -20,6 +20,7 @@ const AdminPage = () => {
   const [stats, setStats] = useState<DayStats[]>([]);
   const [resetting, setResetting] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmCategory, setConfirmCategory] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchStats = useCallback(async () => {
@@ -50,22 +51,25 @@ const AdminPage = () => {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  const resetAllQueues = async () => {
+  const runReset = async (category: string | null) => {
     setResetting(true);
-    await supabase
-      .from('tickets')
-      .update({ status: 'done' })
-      .in('status', ['waiting', 'serving']);
+    const { data, error } = await supabase.rpc('reset_queues', {
+      p_category: category,
+    });
+    setResetting(false);
 
-    for (const cat of CATEGORIES) {
-      await supabase
-        .from('counters')
-        .update({ current_number: 0, last_reset_date: new Date().toISOString().split('T')[0] })
-        .eq('category', cat.key);
+    if (error) {
+      toast.error(error.message || 'Failed to reset queue');
+      return;
     }
 
+    toast.success(
+      category
+        ? `${category} queue reset — ${data ?? 0} pending ticket(s) deleted`
+        : `All queues reset — ${data ?? 0} pending ticket(s) deleted`
+    );
     setConfirmReset(false);
-    setResetting(false);
+    setConfirmCategory(null);
     fetchStats();
   };
 
@@ -150,6 +154,35 @@ const AdminPage = () => {
                       <p className="text-[10px] text-muted-foreground uppercase">Skipped</p>
                     </div>
                   </div>
+                  <div className="px-4 pb-4">
+                    {confirmCategory === cat.key ? (
+                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
+                        <p className="text-xs text-destructive flex-1">Delete pending tickets for {cat.key}?</p>
+                        <button
+                          onClick={() => runReset(cat.key)}
+                          disabled={resetting}
+                          className="px-3 py-1.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-medium hover:opacity-90 disabled:opacity-50"
+                        >
+                          {resetting ? '…' : 'Confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmCategory(null)}
+                          className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setConfirmReset(false); setConfirmCategory(cat.key); }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        Reset This Queue
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -182,11 +215,11 @@ const AdminPage = () => {
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Queue Controls</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Reset all queues to clear waiting and serving tickets. This marks all active tickets as done and resets counters.
+              Delete all pending (waiting &amp; serving) tickets across every window and reset the daily numbering back to zero.
             </p>
             {!confirmReset ? (
               <button
-                onClick={() => setConfirmReset(true)}
+                onClick={() => { setConfirmCategory(null); setConfirmReset(true); }}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-destructive-foreground font-medium hover:opacity-90 transition-all active:scale-[0.98]"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -197,7 +230,7 @@ const AdminPage = () => {
                 <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
                 <p className="text-sm text-destructive flex-1">Are you sure? This cannot be undone.</p>
                 <button
-                  onClick={resetAllQueues}
+                  onClick={() => runReset(null)}
                   disabled={resetting}
                   className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
