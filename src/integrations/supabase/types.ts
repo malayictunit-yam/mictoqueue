@@ -227,6 +227,7 @@ export type Database = {
           ticket_label: string
         }[]
       }
+      reset_queues: { Args: { p_category?: string }; Returns: number }
       skip_ticket: { Args: { p_window_id: number }; Returns: undefined }
       undo_last_call: {
         Args: { p_window_id: number }
