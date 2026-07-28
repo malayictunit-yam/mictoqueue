@@ -215,11 +215,11 @@ const AdminPage = () => {
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Queue Controls</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Reset all queues to clear waiting and serving tickets. This marks all active tickets as done and resets counters.
+              Delete all pending (waiting &amp; serving) tickets across every window and reset the daily numbering back to zero.
             </p>
             {!confirmReset ? (
               <button
-                onClick={() => setConfirmReset(true)}
+                onClick={() => { setConfirmCategory(null); setConfirmReset(true); }}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-destructive-foreground font-medium hover:opacity-90 transition-all active:scale-[0.98]"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -230,7 +230,7 @@ const AdminPage = () => {
                 <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
                 <p className="text-sm text-destructive flex-1">Are you sure? This cannot be undone.</p>
                 <button
-                  onClick={resetAllQueues}
+                  onClick={() => runReset(null)}
                   disabled={resetting}
                   className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
