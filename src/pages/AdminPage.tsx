@@ -50,22 +50,25 @@ const AdminPage = () => {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  const resetAllQueues = async () => {
+  const runReset = async (category: string | null) => {
     setResetting(true);
-    await supabase
-      .from('tickets')
-      .update({ status: 'done' })
-      .in('status', ['waiting', 'serving']);
+    const { data, error } = await supabase.rpc('reset_queues', {
+      p_category: category,
+    });
+    setResetting(false);
 
-    for (const cat of CATEGORIES) {
-      await supabase
-        .from('counters')
-        .update({ current_number: 0, last_reset_date: new Date().toISOString().split('T')[0] })
-        .eq('category', cat.key);
+    if (error) {
+      toast.error(error.message || 'Failed to reset queue');
+      return;
     }
 
+    toast.success(
+      category
+        ? `${category} queue reset — ${data ?? 0} pending ticket(s) deleted`
+        : `All queues reset — ${data ?? 0} pending ticket(s) deleted`
+    );
     setConfirmReset(false);
-    setResetting(false);
+    setConfirmCategory(null);
     fetchStats();
   };
 
