@@ -20,6 +20,7 @@ const AdminPage = () => {
   const [stats, setStats] = useState<DayStats[]>([]);
   const [resetting, setResetting] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmCategory, setConfirmCategory] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchStats = useCallback(async () => {
