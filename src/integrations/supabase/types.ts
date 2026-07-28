@@ -184,36 +184,7 @@ export type Database = {
       }
     }
     Views: {
-      public_queue: {
-        Row: {
-          category: string | null
-          created_at: string | null
-          id: string | null
-          number: number | null
-          status: string | null
-          ticket_number: string | null
-          window_id: number | null
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string | null
-          id?: string | null
-          number?: number | null
-          status?: string | null
-          ticket_number?: string | null
-          window_id?: number | null
-        }
-        Update: {
-          category?: string | null
-          created_at?: string | null
-          id?: string | null
-          number?: number | null
-          status?: string | null
-          ticket_number?: string | null
-          window_id?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       call_next_ticket: {
